@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Investment App Risk Check</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header><a href="/">🛡️ RiskLens</a><span>Investment app risk screening demo</span></header>
+<main>
+  <section class="intro">
+    <p class="eyebrow">PAUSE · CHECK · VERIFY</p>
+    <h1>Check the warning signs.</h1>
+    <p>Enter what you know about an investment app to see a simple machine-learning risk estimate.</p>
+  </section>
+  <section class="form-card">
+    <h2>App indicators</h2>
+    <form method="post">
+      <label>App age (days)<input type="number" name="app_age_days" min="0" max="50000" required value="{{ form_values.app_age_days }}"></label>
+      {% set fields = [
+        ('guaranteed_returns','Does it promise guaranteed or unusually high returns?'),
+        ('regulator_registered','Have you confirmed its registration with the relevant regulator?'),
+        ('withdrawal_complaints','Have you found credible reports of withdrawal problems?'),
+        ('pressure_tactics','Does it pressure you to invest immediately?'),
+        ('transparent_fees','Are fees and risks clearly explained?'),
+        ('verified_publisher','Have you confirmed the publisher identity?')
+      ] %}
+      {% for name, label in fields %}
+      <label>{{ label }}
+        <select name="{{ name }}">
+          <option value="0" {% if form_values[name] == '0' %}selected{% endif %}>No / not confirmed</option>
+          <option value="1" {% if form_values[name] == '1' %}selected{% endif %}>Yes / confirmed</option>
+        </select>
+      </label>
+      {% endfor %}
+      <button type="submit">Estimate risk</button>
+    </form>
+  </section>
+  {% if result %}
+  <section class="result {% if result.error %}error{% endif %}">
+    {% if result.error %}
+      <h2>Check your entries</h2><p>{{ result.error }}</p>
+    {% else %}
+      <p class="eyebrow">DEMO MODEL RESULT</p><h2>{{ result.label }}</h2>
+      <div class="meter"><div style="width: {{ result.percent }}%"></div></div>
+      <p><strong>{{ result.percent }}%</strong> model-estimated higher-risk probability for this demo model.</p>
+      <h3>Indicators to review</h3>
+      {% if result.flags %}<ul>{% for flag in result.flags %}<li>{{ flag }}</li>{% endfor %}</ul>{% else %}<p>No listed warning indicator was selected, but this does not prove the app is safe.</p>{% endif %}
+      <p class="notice">{{ result.note }}</p>
+    {% endif %}
+  </section>
+  {% endif %}
+  <section class="disclaimer"><strong>Important:</strong> This tool is not a financial advisor and cannot prove fraud or legitimacy. Independently verify registration, read official regulator warnings, and never invest money you cannot afford to lose.</section>
+</main>
+<footer>RiskLens · Academic machine-learning demonstration</footer>
+</body>
+</html>
